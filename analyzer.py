@@ -43,19 +43,13 @@ def analyze_document(text: str):
         )
                 # Extract the AI's reply
         ai_response = response.choices[0].message.content
-        {
-  "choices": [
-    {
-      "message": {
-        "content": "The AI's actual response text goes here"
-      }
-    }
-  ]
-}
+        
                 # Basic validation: ensure it contains JSON-like structure
         if not ("summary" in ai_response and "sentiment" in ai_response):
             raise ValueError("AI response missing expected fields")
-                return ai_response
-            except Exception as e:
+        
+        return ai_response
+    
+    except Exception as e:
         # Return a graceful error message as a pseudo-JSON string
         return f'{{"summary": "Analysis failed.", "sentiment": "Error", "key_topics": [], "action_items": ["Error: {str(e)}"]}}'
