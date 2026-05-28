@@ -1,18 +1,37 @@
 import os
+import re
 from nicegui import ui
 from openai import AsyncOpenAI, AuthenticationError
 
-# Read the environment variable directly from the terminal injection
+# 1. MAKE SURE THIS KEY STARTS WITH: sk-or-v1-
+MY_SECRET_KEY = "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"
+
+# Initialize the Client directly using your hardcoded key string
 client = AsyncOpenAI(
     base_url="https://openrouter.ai",
-    api_key=os.environ.get("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")
+    api_key=MY_SECRET_KEY
 )
+
+def clean_html_error(html_text: str) -> str:
+    """Helper to extract human-readable text out of an unexpected HTML response."""
+    # Find the title or clear text blocks inside the HTML response
+    title_match = re.search(r'<title>(.*?)</title>', html_text, re.IGNORECASE)
+    desc_match = re.search(r'<meta name="description" content="(.*?)"', html_text, re.IGNORECASE)
+    
+    error_summary = "OpenRouter returned an HTML page instead of data.\n\n"
+    if title_match:
+        error_summary += f"Page Title: {title_match.group(1)}\n"
+    if desc_match:
+        error_summary += f"Description: {desc_match.group(1)}\n"
+        
+    error_summary += "\nPossible Fixes:\n1. Verify your key starts with 'sk-or-v1-'\n2. Ensure your OpenRouter account email is confirmed."
+    return error_summary
 
 async def fetch_probability(question: str, context: str):
     """Queries OpenRouter using a completely free open-source model."""
     try:
-        if not os.environ.get("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"):
-            return "Error: OPENAI_API_KEY could not be read. Please run using: OPENAI_API_KEY='your-key' python main.py"
+        if MY_SECRET_KEY == "your-actual-openrouter-key-here" or not MY_SECRET_KEY:
+            return "Error: You need to open main.py and replace placeholders with your real OpenRouter key string on line 6."
 
         prompt = f"""
         Given the following context and question, provide a statistical probability (0% to 100%) 
@@ -35,12 +54,26 @@ async def fetch_probability(question: str, context: str):
                 "X-Title": "Statistical AI Project",
             }
         )
-        return response.choices.message.content.strip()
+        
+        # If OpenRouter gives a raw text block back instead of an object response
+        if isinstance(response, str):
+            if "<html" in response.lower():
+                return clean_html_error(response)
+            return f"OpenRouter Message:\n{response}"
+            
+        if hasattr(response, 'choices') and response.choices:
+            return response.choices.message.content.strip()
+            
+        return f"Unexpected API response format: {str(response)}"
         
     except AuthenticationError:
-        return "Authentication Error: Your OpenRouter API key is incorrect or inactive."
+        return "Authentication Error: The API key pasted on line 6 is invalid. Double check that you copied the full key from openrouter.ai."
     except Exception as e:
-        return f"Error analyzing data: {str(e)}"
+        # Check if the text of the exception contains HTML fragments
+        err_str = str(e)
+        if "<html" in err_str.lower():
+            return clean_html_error(err_str)
+        return f"Error analyzing data: {err_str}"
 
 # Setup Dark Mode and Page Styling
 ui.dark_mode().enable()
