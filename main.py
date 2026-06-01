@@ -1,10 +1,19 @@
 import os
 import re
+from fastapi import requests
 from nicegui import ui
 from openai import AsyncOpenAI, AuthenticationError
+import json
+import dotenv
 
+import requests
+dotenv.load_dotenv()
 # 1. MAKE SURE THIS KEY STARTS WITH: sk-or-v1-
-MY_SECRET_KEY = "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"
+from dotenv import load_dotenv
+load_dotenv()
+MY_SECRET_KEY = os.getenv("MY_SECRET_KEY")  # Reads OpenRouter API key from
+
+
 
 # Initialize the Client directly using your hardcoded key string
 client = AsyncOpenAI(
@@ -28,52 +37,90 @@ def clean_html_error(html_text: str) -> str:
     return error_summary
 
 async def fetch_probability(question: str, context: str):
-    """Queries OpenRouter using a completely free open-source model."""
-    try:
-        if MY_SECRET_KEY == "your-actual-openrouter-key-here" or not MY_SECRET_KEY:
-            return "Error: You need to open main.py and replace placeholders with your real OpenRouter key string on line 6."
-
-        prompt = f"""
-        Given the following context and question, provide a statistical probability (0% to 100%) 
+    prompt = f"""
+        Given the following context and question, provide a statistical probability based on searches through the internet (0% to 100%) 
         and a brief explanation based on the likelihood or truth of the statement.
-        
+        The question can be any question, but take in the context given in order to find data that show similar scenarios in order to return the statistical probability
+        It doesn't matter if the question is satirical, or meant as a joke, or is a dumb question, always try and find sources to return a probability.
+
         Context: {context}
         Question: {question}
 
         Format exactly as: "Probability: [X]%\nReasoning: [Explanation]"
         """
+    response = requests.post(
+    url="https://openrouter.ai/api/v1/chat/completions",
+    headers={
+    "Authorization": "Bearer " + MY_SECRET_KEY,
+    "Content-Type": "application/json",
+    },
+    data=json.dumps({
+    "model": "google/gemma-4-31b-it:free",
+    "messages": [
+        {
+            "role": "user",
+            "content": prompt
+        }
+        ],
+    "reasoning": {"enabled": True}
+    })
+    )
+
+    # Extract the assistant message with reasoning_details
+    response = response.json()
+    #print(response)  # Debug: Print the full response to understand its structure
+    output = response['choices'][0]['message']['content']
+    print(output)
+
+    # """Queries OpenRouter using a completely free open-source model."""
+    # try:
+    #     if MY_SECRET_KEY == "your-actual-openrouter-key-here" or not MY_SECRET_KEY:
+    #         return "Error: You need to open main.py and replace placeholders with your real OpenRouter key string on line 6."
+
+    #     prompt = f"""
+    #     Given the following context and question, provide a statistical probability based on searches through the internet (0% to 100%) 
+    #     and a brief explanation based on the likelihood or truth of the statement.
+    #     The question can be any question, but take in the context given in order to find data that show similar scenarios in order to return the statistical probability
+    #     It doesn't matter if the question is satirical, or meant as a joke, or is a dumb question, always try and find sources to return a probability.
+
+    #     Context: {context}
+    #     Question: {question}
+
+    #     Format exactly as: "Probability: [X]%\nReasoning: [Explanation]"
+    #     """
         
-        response = await client.chat.completions.create(
-            model="meta-llama/llama-3-8b-instruct:free",
-            messages=[
-                {"role": "system", "content": "You are a precise statistical analysis AI."},
-                {"role": "user", "content": prompt}
-            ],
-            extra_headers={
-                "HTTP-Referer": "http://localhost:8080",
-                "X-Title": "Statistical AI Project",
-            }
-        )
+    #     response = await client.chat.completions.create(
+    #         model="meta-llama/llama-3-8b-instruct:free",
+    #         messages=[
+    #             {"role": "system", "content": "You are a precise statistical analysis AI that can take in ANY question in order to return a statistical answer.."},
+    #             {"role": "user", "content": prompt}
+    #         ],
+    #         extra_headers={
+    #             "HTTP-Referer": "http://localhost:8080",
+    #             "X-Title": "Statistical AI Project",
+    #         }
+    #     )
         
-        # If OpenRouter gives a raw text block back instead of an object response
-        if isinstance(response, str):
-            if "<html" in response.lower():
-                return clean_html_error(response)
-            return f"OpenRouter Message:\n{response}"
+
+    #     # If OpenRouter gives a raw text block back instead of an object response
+    #     if isinstance(response, str):
+    #         if "<html" in response.lower():
+    #             return clean_html_error(response)
+    #         return f"OpenRouter Message:\n{response}"
             
-        if hasattr(response, 'choices') and response.choices:
-            return response.choices.message.content.strip()
+    #     if hasattr(response, 'choices') and response.choices:
+    #         return response.choices.message.content.strip()
             
-        return f"Unexpected API response format: {str(response)}"
+    #     return f"Unexpected API response format: {str(response)}"
         
-    except AuthenticationError:
-        return "Authentication Error: The API key pasted on line 6 is invalid. Double check that you copied the full key from openrouter.ai."
-    except Exception as e:
-        # Check if the text of the exception contains HTML fragments
-        err_str = str(e)
-        if "<html" in err_str.lower():
-            return clean_html_error(err_str)
-        return f"Error analyzing data: {err_str}"
+    # except AuthenticationError:
+    #     return "Authentication Error: The API key pasted on line 6 is invalid. Double check that you copied the full key from openrouter.ai."
+    # except Exception as e:
+    #     # Check if the text of the exception contains HTML fragments
+    #     err_str = str(e)
+    #     if "<html" in err_str.lower():
+    #         return clean_html_error(err_str)
+    #     return f"Error analyzing data: {err_str}"
 
 # Setup Dark Mode and Page Styling
 ui.dark_mode().enable()
@@ -81,8 +128,8 @@ ui.query('body').style('background-color: #121212; color: white; font-family: Ar
 
 # Global layout containers
 with ui.column().classes('w-full max-w-2xl mx-auto p-8 mt-12'):
-    ui.label('Statistical AI Analyzer').classes('text-4xl font-bold mb-2 text-blue-500')
-    ui.label('Powered by OpenRouter Free Tier').classes('text-sm text-gray-500 mb-6 uppercase tracking-wider')
+    ui.label('Statistical AI Analyzer').classes('text-6xl font-bold mb-2 text-blue-500')
+    ui.label('Type in any question and provide context for said question, and a statistical probability for said question will occur. The type of question does not matter(Ex. An unserious/joke question will return a probability all the same.)').classes('text-sm text-yellow-400 mb-6 tracking-wider')
 
     question_input = ui.input(label='Your Question').classes('w-full mb-4')
     context_input = ui.textarea(label='Context / Background Data').classes('w-full mb-6').props('rows=4')
