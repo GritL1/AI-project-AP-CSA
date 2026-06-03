@@ -12,7 +12,7 @@ dotenv.load_dotenv()
 from dotenv import load_dotenv
 load_dotenv()
 MY_SECRET_KEY = os.getenv("MY_SECRET_KEY")  # Reads OpenRouter API key from
-
+result = ""
 
 
 # Initialize the Client directly using your hardcoded key string
@@ -70,7 +70,7 @@ async def fetch_probability(question: str, context: str):
     response = response.json()
     #print(response)  # Debug: Print the full response to understand its structure
     output = response['choices'][0]['message']['content']
-    print(output)
+    result = output
 
     # """Queries OpenRouter using a completely free open-source model."""
     # try:
@@ -128,14 +128,14 @@ ui.query('body').style('background-color: #121212; color: white; font-family: Ar
 
 # Global layout containers
 with ui.column().classes('w-full max-w-2xl mx-auto p-8 mt-12'):
-    ui.label('Statistical AI Analyzer').classes('text-6xl font-bold mb-2 text-blue-500')
+    ui.label('Statistical AI Analyzer').classes('text-5xl font-bold mb-2 text-blue-500')
     ui.label('Type in any question and provide context for said question, and a statistical probability for said question will occur. The type of question does not matter(Ex. An unserious/joke question will return a probability all the same.)').classes('text-sm text-yellow-400 mb-6 tracking-wider')
 
     question_input = ui.input(label='Your Question').classes('w-full mb-4')
     context_input = ui.textarea(label='Context / Background Data').classes('w-full mb-6').props('rows=4')
     
     with ui.card().classes('w-full p-6 bg-gray-800 text-white mt-4') as result_card:
-        result_text = ui.label('').classes('text-lg font-medium whitespace-pre-line')
+        result_text = ui.label(result).classes('text-lg font-medium whitespace-pre-line')
     
     result_card.set_visibility(False)
 
