@@ -1,8 +1,7 @@
 # Pondering The Orb
 ## Demo Video:
 <video width="640" height="360" controls>
-  <source src="/workspaces/AI-project-AP-CSA/assets/video/Screen Recording 2026-06-11 133839.mp4" type="video/mp4">
-  Your browser does not support the video tag.
+  <source src="/workspaces/AI-project-AP-CSA/assets/video/Trimmed.mp4" type="video/mp4">
 </video>
 
 ## What does it do?
