@@ -106,7 +106,7 @@ async def fetch_probability(question: str, context: str, attempt=0):
 
     prompt = f"""
         Given the following context and question, provide a statistical probability based on searches through the internet (0% to 100%)
-        and a brief explanation based on the likelihood or truth of the statement.
+        and a brief explanation based on the likelihood or truth of the statement. The probability MUST be an integer. 
         The question can be any question, but take in the context given in order to find data that show similar scenarios in order to return the statistical probability
         It doesn't matter if the question is satirical, or meant as a joke, or is a dumb question, always try and find sources to return a probability.
         You are able to comprehend and understand internet slang terms. If there is a word within the prompt that feels out of place or doesn't follow standard english conventions, search it up as it is most likely internet slang
