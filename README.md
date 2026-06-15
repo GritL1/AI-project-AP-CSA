@@ -2,12 +2,17 @@
 ## Demo Video:
 <video width="640" height="360" controls>
   <source src="/workspaces/AI-project-AP-CSA/assets/video/Trimmed.mp4" type="video/mp4">
+Video is on the google classroom
 </video>
 
 ## What does it do?
 The Orb is an AI-powered tool that allows users to be able to find out the probability of any question with a bit of context given. It can find out the chance of any event happening in the future, or the chances that someone has a specific characteristic, or really just anything in the whole entire universe. After it gives the probablity, it gives reasoning behind the probablity, allowing for users to have a detailed explanation as to what's gonna happen and why the Orb gave the number that it did. 
 ## How to ponder the orb
 Users must first install everything in the requirements.txt file. Then, they have to run main.py. When a new tab shows up, all they have to do is type in a question, give some context, and then click "Calculate Probability". Afterwards, they will receive a message from the Orb, giving them the probablity and reasoning behind the answer. If the user wishes to keep pondering the Orb with different questions, all they have to do is change the inputted question and context, and then click "Calculate Probablity" again.
+## Usage of a research paper
+We utilized a paper from Cornell University, that taught us how to properly utilize the dotenv and .env files, as well as the fundamental imports for the AI api keys
+https://arxiv.org/pdf/2410.20211 
+
 ## Working with an AI Agent
 ### Backend (Grit Li)
 For the backend of the code, I utilized google gemini and deepseek to create the frameworks for the api calling. Originally, deepseek’s code couldn’t function properly because it called the api too many times in a minute, so I had to go in and limit the amount of times any given api was called. However, this only partially solved the problem as because we utilized an api key from openrouter and called from free google gemma, the code would sometimes break because the gemma AI had limited the amount of times it could be called, and had a cooldown. This was the same with every other AI on openrouter we tried, so I ended up using gemini in making it so that the code would reroute to a different api key when the previous key stopped working. The biggest part that worked well was home because gemini and deepseek could pull information from all over the internet, it could generate a basic framework which I edited to fit our code. However, the both AI’s we used failed to help with bug testing, as they aren’t able to run the code themselves and could only function off of the errors we say occurred in the prompt. I learned that with prompting, specifications with what you want it to do. Having a general prompt will only result in code that breaks easily or doesn’t account for the rest of your code. It also helps if you feed the AI your existing code so that it sees what's needed. Another thing I learned that was helpful was that you can ask an AI to add comments describing exactly what it’s doing and where it's changing, fixing, or making additions to the code, so that you can actually track what the AI is trying to do with your code and you can learn from it. If I could do anything differently, I would create the framework myself. The entire structure would be more accurate to what I want to do from the start, but I would use AI in creating smaller parts that I already know how to do so that I can save time and work on other things.
