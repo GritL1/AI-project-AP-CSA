@@ -1,6 +1,6 @@
 # Pondering The Orb
 ## Demo Video:
-Demo video is on google classroom
+Demo video is on google classroom because the file is too large to import into github
 <video width="640" height="360" controls>
   <source src="/workspaces/AI-project-AP-CSA/assets/video/Trimmed.mp4" type="video/mp4">
 </video>
